@@ -13,3 +13,13 @@ dist/
 .idea/
 .DS_Store
 Thumbs.db
+# Fake API runtime data (recreate with `npm run seed:reset`)
+fake-api/db.json
+
+# Build output
+storybook-static/
+*.tsbuildinfo
+coverage/
+
+# Confidential assignment brief
+*.pdf

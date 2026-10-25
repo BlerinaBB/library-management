@@ -1,0 +1,54 @@
+import { Meta, Source } from "@storybook/addon-docs/blocks";
+import memberSource from "../examples/member.resource.tsx?raw";
+
+<Meta title="Guide/Recipes" />
+
+# Recipes
+
+## Add a resource
+
+A new resource needs four things, and no change to the kit:
+
+1. **A domain model**: the API record type (and a form type if it differs).
+2. **A resource configuration**: `defineResource` with columns, filters and fields from the factories.
+3. **API support**: the endpoints your Refine data provider calls (`/members`, with `getMany` for relations).
+4. **Registration**: `{ name: "members" }` in `<Refine resources>` and a route rendering the page.
+
+The complete example below is a real file in this repository; it is type-checked with the stories.
+
+<Source language="tsx" code={memberSource} />
+
+## Compose a custom screen
+
+`ResourcePage` is only composition. Build your own layout from the same pieces when a screen needs something the standard layout does not offer; see **Composition / Custom screen** for the running version.
+
+```tsx
+function InventoryScreen() {
+  const controller = useResourceController(bookConfig);
+  const { records, tableProps, drawerProps, formProps } = controller;
+  const actions = columns.actions<Book>({
+    actions: () => [{ key: "edit", label: "Restock", onClick: controller.edit }],
+  });
+
+  return (
+    <>
+      <Statistic title="In stock" value={records.filter((b) => b.inStock).length} />
+      <RelationResolver relations={controller.relations} records={records}>
+        {(relationData) => (
+          <DataTable<Book>
+            {...tableProps}
+            columns={[...tableProps.columns, actions]}
+            relationData={relationData}
+            relationSelect={RefineRelationSelect}
+          />
+        )}
+      </RelationResolver>
+      <ResourceDrawer {...drawerProps}>
+        <ResourceForm {...formProps} relationSelect={RefineRelationSelect} />
+      </ResourceDrawer>
+    </>
+  );
+}
+```
+
+Without Refine at all, use `DataTable`, `ResourceDrawer` and `ResourceForm` directly with your own state; `useDrawerState` holds the drawer state, and any component implementing `RelationSelectProps` can serve relation selects (see **Components / ResourceForm**).

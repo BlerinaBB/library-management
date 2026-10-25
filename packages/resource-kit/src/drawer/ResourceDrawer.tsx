@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { resolveTexts } from "../config/texts";
 import type { ResourceTexts } from "../config/texts";
 import type { DrawerState, OpenDrawerState } from "../types/drawer";
+import { drawerStateKey } from "./useDrawerState";
 import type { ResourceLabels } from "../types/resource";
 
 export interface DrawerFooterContext {
@@ -21,7 +22,7 @@ export interface ResourceDrawerProps
   onClose: () => void;
   /** Called by the save button. Typically `form.submit`. */
   onSubmit: () => void;
-  /** When given, the form is reset each time the drawer opens or finishes loading a record. */
+  /** When given, the form is reset each time the drawer opens or switches record. */
   form?: FormInstance;
   /** The edited record is loading. */
   loading?: boolean;
@@ -32,10 +33,6 @@ export interface ResourceDrawerProps
   footer?: (context: DrawerFooterContext) => ReactNode;
   texts?: Partial<ResourceTexts>;
   children: ReactNode;
-}
-
-function stateKey(state: DrawerState): string {
-  return state.mode === "edit" ? `edit:${state.id}` : state.mode;
 }
 
 /** One drawer for create and edit. Presentation and form lifecycle only; data operations stay with the caller. */
@@ -56,14 +53,14 @@ export function ResourceDrawer({
 }: ResourceDrawerProps) {
   const texts = resolveTexts(textOverrides);
   const open = state.mode !== "closed";
-  const key = stateKey(state);
+  const key = drawerStateKey(state);
 
-  // Reset to the form's current `initialValues` whenever a different record (or create) is shown,
-  // and again once an edited record has loaded. Child effects run first, so the Form has
-  // already received its new initial values when this runs.
+  // Clear leftovers whenever the drawer opens or switches record. Drawer content renders in
+  // its own commit, so this can run before the form has received new `initialValues`;
+  // `ResourceForm`'s `resetKey` applies them once they arrive (see useResourceController).
   useEffect(() => {
-    if (open && !loading) form?.resetFields();
-  }, [form, open, key, loading]);
+    if (open) form?.resetFields();
+  }, [form, open, key]);
 
   const cancel = () => {
     if (!submitting) onClose();

@@ -3,7 +3,14 @@
 
 // Configuration
 export { defineResource, isRelationColumn, tableRelations } from "./config/defineResource";
-export { defineRelation, relationKey, getRelationLabel, collectForeignIds, buildRelationLookup } from "./config/relations";
+export {
+  defineRelation,
+  relationKey,
+  getRelationLabel,
+  collectForeignIds,
+  buildRelationLookup,
+  PENDING_LOOKUP,
+} from "./config/relations";
 export { isMissing, formatDate, formatNumber, formatMoney } from "./config/formatting";
 export { defaultTexts } from "./config/texts";
 export type { ResourceTexts } from "./config/texts";
@@ -51,7 +58,7 @@ export type { ResourceFormProps } from "./form/ResourceForm";
 // Drawer
 export { ResourceDrawer } from "./drawer/ResourceDrawer";
 export type { ResourceDrawerProps, DrawerFooterContext } from "./drawer/ResourceDrawer";
-export { useDrawerState } from "./drawer/useDrawerState";
+export { useDrawerState, drawerStateKey } from "./drawer/useDrawerState";
 export type { DrawerStateApi } from "./drawer/useDrawerState";
 
 // Refine integration

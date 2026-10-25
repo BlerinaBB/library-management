@@ -10,10 +10,10 @@ export const authorConfig = defineResource<Author, AuthorFormValues, AuthorVaria
   labels: { singular: "Author", plural: "Authors" },
 
   table: {
-    pageSize: 20,
+    pageSize: 10,
     initialSorters: [{ field: "name", order: "asc" }],
     columns: [
-      columns.id("id"),
+      columns.id("id", { width: 120, ellipsis: true }),
       columns.text("name", { sortable: true }),
       columns.text("nationality"),
       columns.date("birthDate", { title: "Born", sortable: true }),
@@ -33,7 +33,15 @@ export const authorConfig = defineResource<Author, AuthorFormValues, AuthorVaria
       fields.custom("nationality", {
         rules: [{ required: true }],
         render: ({ id, value, onChange }) => (
-          <AutoComplete id={id} value={value} onChange={onChange} options={NATIONALITY_SUGGESTIONS} />
+          <AutoComplete
+            id={id}
+            value={value}
+            onChange={onChange}
+            options={NATIONALITY_SUGGESTIONS}
+            showSearch={{
+              filterOption: (input, option) => option?.value.toLowerCase().includes(input.toLowerCase()) ?? false,
+            }}
+          />
         ),
       }),
       fields.date("birthDate", {

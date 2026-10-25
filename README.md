@@ -1,95 +1,139 @@
-# Library Management: resource kit
+# Library Manager
 
-`@library/resource-kit` is a shared package for building CRUD resource screens with **React, TypeScript, Refine and Ant Design**. It is meant to be consumed by many independent repositories. `apps/library-app` is a thin example consumer with two resources, Authors and Books.
+A small library management app (Authors and Books, full CRUD) built with **React, Refine, Ant Design and TypeScript**. The reusable part, a typed resource toolkit, lives in its own buildable package, `@library/resource-kit`, documented with Storybook.
 
 ```
-library-management/
-├── packages/resource-kit/     the shared package (the deliverable)
-├── apps/library-app/          example consumer: models, configs, thin pages, Refine setup
-└── scripts/check-boundaries.mjs
+apps/library-app         the application: domain models, resource configs, routes, providers
+packages/resource-kit    the shared package: components, factories, config types, Refine integration
+  ├─ src/                package source (the only thing that is built and shipped)
+  ├─ stories/            Storybook stories, docs and fixtures (never shipped)
+  └─ .storybook/         Storybook configuration
+fake-api/                json-server fake API: seed.json (canonical) + db.json (runtime, git-ignored)
+scripts/                 boundary check and package-consumption check
 ```
 
-## Commands
+## 1. Prerequisites
 
-| Command | What it does |
-| --- | --- |
-| `npm run verify` | Runs everything below in order. |
-| `npm run build -w @library/resource-kit` | Builds ESM and CJS output plus `.d.ts`/`.d.cts` into `packages/resource-kit/dist`. |
-| `npm run typecheck` | Strict `tsc` over the package, the type-level tests and the app. The app checks against the **built** declarations. |
-| `npm test` | Vitest behavior tests for formatting, filter/sorter translation and column rendering. |
-| `npm run check:cycles` | Runs madge to find circular imports. |
-| `npm run check:boundaries` | Checks dependency direction (see below). |
+- Node.js **20.19+** (developed and verified on Node 22.21) and npm 9+.
+- No registry credentials, accounts or external services are needed.
 
-The app imports the kit through `package.json` `exports`, the same way an external repository would. There are no `paths` or Vite aliases, so the package must be built before you typecheck or run the app.
+## 2. Installation and quick start
 
-## Package layout and responsibilities
+```bash
+npm install
+npm run dev
+```
 
-| Folder | Responsibility | Depends on |
+`npm run dev` builds the shared package once, then runs three processes side by side:
+
+| Name | What | URL |
 | --- | --- | --- |
-| `types/` | Public types: key constraints, `ResourceConfig`, columns, filters, fields, relations, `DrawerState` | antd/dayjs types |
-| `config/` | `defineResource`, `defineRelation`, pure formatting, default texts | `types` |
-| `columns/` | Column factories, `resolveColumns`, `RowActions` | `config`, `types` |
-| `filters/` | Filter factories, filter-state helpers, `FilterBar` / `FilterControl` | `config`, `types` |
-| `table/` | `DataTable`, `composeHandlers`, `useControllableState` | `columns`, `filters` |
-| `form/` | Field factories, `ResourceForm`, `FormField`, `toDayjs` / `fromDayjs` | `config`, `types` |
-| `drawer/` | `ResourceDrawer`, `useDrawerState` | `config`, `types` |
-| `hooks/` | **Refine integration:** `useResourceController`, `useRelationLookup`, Refine filter/sorter translation | everything above + `@refinedev/core` |
-| `resource/` | **Composition:** `ResourcePage`, `RelationResolver`, `RefineRelationSelect`, `ResourceHeader`, `DeleteConfirmModal` | everything |
+| `kit` | `@library/resource-kit` in watch mode (rebuilds `dist/` on change) | — |
+| `api` | fake API (json-server 0.17.4) | http://localhost:3001/api |
+| `app` | Vite dev server; proxies `/api` to the fake API | **http://localhost:5173** |
 
-### Dependency direction
+Press **Ctrl+C** once to stop all three. If any one of them exits, the others are stopped too (`concurrently --kill-others`), so nothing is left running.
+
+Separate commands: `npm run api` (fake API only) and `npm run dev:app` (app only, needs a built kit: `npm run build:kit`).
+
+## 3. Ports and environment variables
+
+All variables are optional; copy `.env.example` to `.env` to change them. The app and the fake API both read the root `.env`.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `API_PORT` | `3001` | Fake API port; the Vite proxy targets it |
+| `APP_PORT` | `5173` | Vite dev server port |
+| `VITE_API_URL` | `/api` | API base URL used by the app (keep `/api` to use the proxy) |
+| `API_DELAY_MS` | `0` | Artificial API latency, to make loading and submitting states visible |
+
+## 4. Seed data and reset
+
+- `fake-api/seed.json` is the canonical seed: 24 authors and 40 books with UUIDs. It covers every field, has several books per author, `true`/`false` values, a zero price, and missing dates and page counts, with enough rows for pagination.
+- `fake-api/db.json` is the writable runtime copy. It is created from the seed on first start and is git-ignored.
+- **`npm run seed:reset`** restores `db.json` from the seed. A running API picks up the change without a restart.
+
+Rules enforced at the fake API boundary (`fake-api/server.mjs`):
+
+- **IDs:** the API generates a UUID (`crypto.randomUUID()`) for every create and ignores client-supplied ids. Updates cannot change an id.
+- **Deleting a referenced author is rejected** with `409` and a readable message ("This author still has 3 book(s)…"), which the app shows as an error notification. Without this, json-server 0.17 would silently delete the author's books. Reassign or delete the books first.
+- **Literal text filters:** text filters (`title_like`) match literally and case-insensitively. json-server would otherwise treat the value as a regular expression and return a 500 for input like `(`.
+
+## 5. Storybook
+
+```bash
+npm run storybook         # dev server on http://localhost:6006 (not started by npm run dev)
+npm run build-storybook   # static build in packages/resource-kit/storybook-static
+```
+
+Storybook needs no build step, fake API or network:
+
+- **Imports:** stories import the package by its public name, which Storybook maps to the public entry point.
+- **Presentation stories** run without Refine.
+- **Refine stories** use an in-memory data provider, recreated for every story.
+
+Contents:
+
+- **Guide:** overview, required providers, controlled props, configuration, relations, adding a resource, composing a screen.
+- **Components:** `DataTable` (basic, loading, empty, controlled pagination, row selection, column customization, controlled filters with reset), `ResourceForm` (all field types, initial values, validation, disabled, loading, custom field, API↔form date conversion) and `ResourceDrawer` (create, prefilled edit, record loading, submission in progress, failed submission).
+- **Columns:** every column factory, with false, zero, missing values, three currencies and each relation state.
+- **Composition:** `ResourcePage` for Authors and Books (interactive CRUD, slow API, failing saves) and a custom screen built without `ResourcePage`.
+
+## 6. Validation commands
+
+| Command | Checks |
+| --- | --- |
+| `npm run verify` | Everything below, in order |
+| `npm run typecheck` | Builds the kit, then strict `tsc` over the package, its tests/stories and the app. The app type-checks against the kit's **built** declarations. |
+| `npm run lint` | ESLint (typescript-eslint, react-hooks) over the repository |
+| `npm test` | Vitest: formatting, filter/sorter translation, column rendering (`false`/`0`/missing/pending), plus Storybook interaction checks (filter reset, required-field validation, drawer submission, failed save, date round-trip) run as portable stories in jsdom |
+| `npm run check:cycles` | madge: no circular imports |
+| `npm run check:boundaries` | Dependency rules (see §7) |
+| `npm run build` | Kit build + app production build |
+| `npm run build-storybook` | Static Storybook build |
+| `npm run check:consumer` | Independent package consumption (see §10) |
+
+Type-level guarantees (for example, a money column on a text field fails to compile) are pinned in `packages/resource-kit/test/factory-types.typecheck.tsx`.
+
+## 7. Architecture
+
+The reusable components and resource abstractions live in an independently buildable package, `@library/resource-kit`. The application consumes its public API, while domain models, configuration and business rules remain in the application. Storybook documents the package's components, supported states and composition patterns.
+
+**Ownership**
+
+- **Package:**
+  - generic config types (`ResourceConfig`, `FieldDef`, `FilterDef`, `RelationDef`)
+  - column, filter and field factories
+  - `DataTable`, `ResourceForm`, `ResourceDrawer` and `ResourcePage`
+  - Refine integration: `useResourceController`, relation resolution, filter translation
+- **App:**
+  - models, resource configs, validation rules and labels
+  - routes, providers (`<Refine>`, data provider, notification provider), API URL
+  - business rules (the delete policy lives at the API boundary)
+
+**Dependency direction**, enforced by `npm run check:boundaries`:
 
 ```
-app ──► @library/resource-kit (public entry only)
+apps/library-app ──► @library/resource-kit (public entry only; no path aliases, no deep imports)
 
-resource ──► hooks ──► table / form / drawer / filters / columns ──► config ──► types
-                │
-                └──► @refinedev/core   (only hooks/ and resource/ may import Refine)
+resource/ (ResourcePage, RelationResolver, RefineRelationSelect)
+   └─► hooks/ (useResourceController, useRelationLookup, Refine translation)   ← only these two layers import Refine
+         └─► table/ form/ drawer/ filters/ columns/ ──► config/ ──► types/
 ```
 
-`scripts/check-boundaries.mjs` enforces these rules:
+The package never imports the app. Presentation layers never import Refine. Stories use public exports only, and `dist/` references peer dependencies only.
 
-- The package never imports from the app or from anything outside its own `src/`.
-- The package imports only its peer dependencies.
-- The presentation layers (`types`, `config`, `columns`, `filters`, `table`, `form`, `drawer`) import neither Refine nor `hooks/` or `resource/`.
-- The app imports only `@library/resource-kit`, never a deep path, and has no source aliases.
-- `dist/` references peer dependencies only.
+**Key decisions**
 
-## Public API
+- **Configuration over code:** each resource is one typed `defineResource<TRecord, TForm, TVariables>()` object. `AuthorsPage` and `BooksPage` are one line each.
+- **Refine owns server state:** list, pagination, sorting and filters live in Refine's `useTable`, and the filter UI state is *derived* from it, which is why filters survive a page refresh. The controller holds only UI state (drawer mode, pending delete, saving).
+- **Explicit record vs form types:** API records keep dates as `YYYY-MM-DD` strings while the form holds `Dayjs` values. The conversions are required by the type system only when the types differ, and they avoid timezone shifts.
+- **One drawer, one form per resource:** create and edit share the field list. The drawer is driven by a single `DrawerState` (`closed | create | edit(id)`).
+- **Notifications:** `@refinedev/antd` 6.0.x requires antd 5, so the app provides a small Refine notification provider on antd 6's `App.useApp()` (`apps/library-app/src/app/useNotificationProvider.tsx`).
 
-Everything public is exported from `src/index.ts`. Anything not listed there is private.
-
-- **Configuration:** `defineResource`, `defineRelation`, `relationKey`, `getRelationLabel`, `isMissing`, `formatDate`, `formatNumber`, `formatMoney`, `defaultTexts`
-- **Factories:**
-  - `columns`: `id`, `text`, `longText`, `date`, `boolean`, `number`, `money`, `enum`, `relation`, `actions`. Use `createColumnFactories(formatDefaults)` to bind formatting defaults.
-  - `filters`: `text`, `boolean`, `enum`, `relation`
-  - `fields`: `text`, `textarea`, `date`, `boolean`, `number`, `money`, `enum`, `relation`, `custom`
-- **Components:** `DataTable`, `FilterBar`, `FilterControl`, `ResourceForm`, `ResourceDrawer`, `ResourcePage`, `ResourceHeader`, `DeleteConfirmModal`, `RelationResolver`, `RefineRelationSelect`, `RowActions`
-- **Hooks:** `useResourceController`, `useRelationLookup`, `useDrawerState`
-- **Translation and utilities:** `toRefineFilters`, `fromRefineFilters`, `toRefineSorters`, `resolveColumns`, `composeHandlers`, `toDayjs`, `fromDayjs`, `isEmptyFilterValue`, `setFilterValue`
-- **Types:** `ResourceConfig`, `FieldDef`, `FilterDef`, `ResourceColumn`, `RelationDef`, `DrawerState`, and related types
-
-### Distribution
-
-- **Exports:** the `exports` map exposes only `.` (`import` → `dist/index.js` + `index.d.ts`, `require` → `dist/index.cjs` + `index.d.cts`). Deep imports fail with `ERR_PACKAGE_PATH_NOT_EXPORTED`.
-- **Peer dependencies:** `react`, `react-dom`, `antd@^6`, `@refinedev/core@^5` and `dayjs` are peers. They are external in the build, so the host provides the single copy.
-- **No side effects:** `"sideEffects": false`. Importing the package registers nothing and adds no globals; this was verified by importing the packed tarball in Node.
-
-## Required host providers
-
-The host application owns its infrastructure:
-
-1. **`<Refine dataProvider=…>`** is required by `useResourceController`, `ResourcePage`, `RelationResolver` and `RefineRelationSelect`. Refine sets up its own react-query client, and the host installs `@tanstack/react-query` as Refine's peer.
-2. **Resources** must be registered with Refine under the same `name` used in `defineResource`.
-3. **`routerProvider`** is needed only for `syncWithLocation: true`.
-4. **Optional providers:** `notificationProvider` (mutation errors and successes are reported through it), `authProvider`, `accessControlProvider`, and an antd `ConfigProvider` / `App` for theme and locale.
-
-The presentation components (`DataTable`, `ResourceForm`, `ResourceDrawer`, `FilterBar`) need no providers.
-
-## Defining a resource
+## 8. Column factories, forms, filters and relations
 
 ```tsx
-import { defineResource, defineRelation, columns, fields, filters, toDayjs, fromDayjs } from "@library/resource-kit";
-
 export const bookAuthor = defineRelation<Book, Author>({
   resource: "authors", foreignKey: "authorId", valueField: "id", labelField: "name",
 });
@@ -99,8 +143,14 @@ export const bookConfig = defineResource<Book, BookFormValues, BookVariables>({
   labels: { singular: "Book", plural: "Books" },
   relations: { author: bookAuthor },
   table: {
-    columns: [columns.text("title", { sortable: true }), columns.relation(bookAuthor), columns.money("price")],
-    filters: [filters.text("title"), filters.relation(bookAuthor, { multiple: true })],
+    columns: [
+      columns.text("title", { sortable: true }),
+      columns.relation(bookAuthor, { title: "Author" }),     // shows the author's name
+      columns.enum("genre", { options: GENRES }),
+      columns.money("price", { sortable: true }),             // formatted with the app's currency
+      columns.boolean("inStock", { title: "In stock" }),
+    ],
+    filters: [filters.text("title"), filters.relation(bookAuthor, { multiple: true }), filters.enum("genre", { options: GENRES, multiple: true })],
   },
   form: {
     fields: [fields.text("title", { rules: [{ required: true }] }), fields.relation("authorId", bookAuthor), fields.date("publishedDate")],
@@ -108,103 +158,84 @@ export const bookConfig = defineResource<Book, BookFormValues, BookVariables>({
     toVariables: (values) => ({ ...values, publishedDate: fromDayjs(values.publishedDate) }),
   },
 });
-
-export const BooksPage = () => <ResourcePage config={bookConfig} />;
 ```
 
-- **Typed keys:** factories infer the record or form type from the surrounding `defineResource<…>`, so no explicit generics are needed. `columns.money("title")` is a compile error, and so are `filters.boolean("price")` and enum options outside the field's union. `test/factory-types.typecheck.tsx` pins these cases.
-- **Record, form and variables:** `TRecord` is the API shape, `TForm` is what Ant Design holds (for example `Dayjs` dates), and `TVariables` is the mutation payload. `toFormValues` and `toVariables` are **required by the type system only when the types differ**.
-- **One field list:** create and edit share the same `form.fields`.
+**Columns**
 
-## Composing a custom screen
+- **Factories:** `id`, `text`, `longText`, `date`, `boolean`, `number`, `money`, `enum`, `relation` and `actions`. Every table column in the app is built with them, including the actions column.
+- **Typed keys:** `money` and `number` accept only numeric fields, `boolean` only boolean fields, and enum options must match the field's union.
+- **Formatting:** app-wide defaults (locale, currency, date format) are bound once with `createColumnFactories` (`apps/library-app/src/resources/formatting.ts`).
+- **Values vs missing:** `false` and `0` render as values; `null`, `undefined` and `""` render an em dash.
 
-`ResourcePage` is a thin layer of composition. You can build the same screen yourself; see `apps/library-app/src/resources/books/BookInventoryScreen.tsx`:
+**Filters**
 
-```tsx
-const controller = useResourceController(bookConfig);
-return (
-  <>
-    <Statistic title="In stock" value={controller.records.filter((b) => b.inStock).length} />
-    <RelationResolver relations={controller.relations} records={controller.records}>
-      {(relationData) => (
-        <DataTable {...controller.tableProps} relationData={relationData} relationSelect={RefineRelationSelect}
-          columns={[...controller.tableProps.columns, columns.actions({ actions: () => [{ key: "edit", label: "Edit", onClick: controller.edit }] })]} />
-      )}
-    </RelationResolver>
-    <ResourceDrawer {...controller.drawerProps}>
-      <ResourceForm {...controller.formProps} relationSelect={RefineRelationSelect} />
-    </ResourceDrawer>
-  </>
-);
-```
+- **Factories:** `text`, `boolean`, `enum` and `relation`, defined like columns and passed to `DataTable` as `filters`.
+- **Operators:** they default sensibly and can be overridden.
+- **Separation:** filter definitions, rendering, controlled state and Refine translation are separate.
+- **Behavior:** they work against the fake API, survive refresh, and reset pagination to page 1.
 
-`ResourcePage` also accepts focused render callbacks instead of boolean switches:
+**Forms**
 
-- `renderHeader(defaultHeader, controller)`
-- `renderBeforeTable(controller)`
-- `rowActions(record, defaults, controller)`
-- `texts`
-- `tableProps` (its handlers are **composed** with the controller's, not replaced)
-- `drawerProps`
-- `relationSelect`
+- **Field types:** text, textarea, date, boolean, number, money, enum, relation and custom, as a discriminated union.
+- **Consumer-owned:** validation is consumer-owned antd `rules`.
+- **One shared definition:** create and edit use the same field list per resource.
 
-## Adding a third resource
+**Author ↔ Book relation**
 
-1. In the app, create `src/resources/members/member.types.ts` with the record type, plus form and variables types if they differ.
-2. Create `member.config.tsx` with `defineResource<Member, …>({ … })` built from the factories, and add any `defineRelation`.
-3. Create `MembersPage.tsx` returning `<ResourcePage config={memberConfig} />`.
-4. Register `{ name: "members" }` with `<Refine resources>` and add a route.
+One `RelationDef` drives three things:
 
-No package change is needed.
+- **The column:** it shows the author's name.
+- **The filter:** a searchable, multi-select author filter.
+- **The form field:** a searchable author select that also shows the current author when they are not on the first page of options.
 
-## Consuming the package from another repository
+For the table, `RelationResolver` collects the unique author ids of the current page and resolves them with **one `getMany` request per page**, not one per row. It uses Refine's cache, and its hooks never run in loops over configuration. Cells show a spinner while authors load, and a "missing reference" rendering for ids that do not resolve.
+
+## 9. Adding a resource
+
+A third resource (for example Members) needs only:
+
+1. **A domain model:** `member.types.ts`.
+2. **A resource configuration:** `member.config.tsx` using the factories, plus a one-line `MembersPage`.
+3. **API support:** a `members` collection in `fake-api/seed.json`.
+4. **Registration:** `{ name: "members" }` in `<Refine resources>` and a route in `App.tsx`.
+
+No shared CRUD component changes. Storybook's **Guide → Recipes** page shows a complete, type-checked Member example, including a relation to Books (`packages/resource-kit/stories/examples/member.resource.tsx`). It also shows how to compose `DataTable`, `ResourceDrawer` and `useResourceController` into a custom screen without `ResourcePage`, which **Composition → Custom screen** runs live.
+
+## 10. Package-consumption verification
 
 ```bash
-# in this repo
-npm run build -w @library/resource-kit
-npm pack -w @library/resource-kit            # → library-resource-kit-0.1.0.tgz
-
-# in the other repo
-npm install ./library-resource-kit-0.1.0.tgz \
-  react react-dom antd @refinedev/core @tanstack/react-query dayjs
+npm run check:consumer
 ```
 
-```tsx
-import { ResourcePage, defineResource, columns, fields } from "@library/resource-kit";
-```
+1. Builds `@library/resource-kit`: ESM + CJS + `.d.ts`/`.d.cts`.
+2. Runs `npm pack`, and asserts the tarball contains only `dist/*` and `package.json` (no sources, stories, fixtures, Storybook config or env files).
+3. Creates a temporary project in the OS temp directory, **outside the workspace**, and installs the tarball plus compatible peers (`react`, `react-dom`, `antd`, `@refinedev/core`, `@tanstack/react-query`, `dayjs`).
+4. Asserts the kit resolves inside that project, has no nested copies of host frameworks, and contains no application code.
+5. Type-checks a consumer that uses components, factories, hooks and types through the public API, including a full check of the kit's own declarations.
+6. Bundles the consumer with Vite, then deletes the temporary project (`KEEP=1` keeps it).
 
-This flow was verified with a separate scratch project: strict `NodeNext` typecheck with library checking on for the kit's declarations, ESM and CJS runtime import, and rejected deep imports.
+The package declares `react`, `react-dom`, `antd` (^6), `@refinedev/core` (^5) and `dayjs` as **peer dependencies** and bundles none of them. Its `exports` map exposes only the entry point, so deep imports fail. `"sideEffects": false`, and importing the package has no side effects.
 
-**Versioned distribution later:** publish the same tarball to a private registry (GitHub Packages, Artifactory, Verdaccio) by adding `publishConfig.registry`. Then version it with Changesets or semantic-release and have consumers pin `^x.y.z`. Treat changes to `src/index.ts` and to the exported types as the semver surface, and widen the peer ranges only after testing.
+## 11. Reuse across independent repositories
 
-## Extension points
+For an environment with 100+ repositories, this package could be published to a private npm registry, such as GitHub Packages, using semantic versioning. Each application would consume a versioned release and upgrade independently. The package could remain in this monorepo or move to a dedicated repository according to team ownership, while retaining the same public imports.
 
-| Need | Extension point |
-| --- | --- |
-| Locale, currency, date format, empty text, boolean labels | `createColumnFactories(defaults)`, or `format` on any column |
-| Any column prop (width, fixed, render, sorter…) | Column `options`, spread last |
-| Filter operators and keys | `operator` / `key` on filter factories; operator names are Refine `CrudOperators` |
-| Unusual form controls | `fields.custom(name, { render })` with a typed `value` and `onChange` |
-| API ↔ form conversion | `toFormValues` / `toVariables` (with a `{ mode, record }` context) |
-| Validation | Consumer-supplied antd `rules` per field |
-| How relation options load | `relationSelect` component (contract: `RelationSelectProps`); default `RefineRelationSelect` |
-| Relation labels and missing references | `formatLabel` on the relation; `renderRelated` / `renderMissing` on the column |
-| Row actions and business rules | `rowActions(record, defaults)`; `columns.actions` in custom layouts |
-| Post-save and post-delete behavior | `controllerOptions.onSaved` / `onDeleted`; `invalidates` |
-| Data provider, meta, URL sync | `controllerOptions.dataProviderName`, `meta`, `syncWithLocation` |
-| User-facing strings | `texts` (partial `ResourceTexts`) |
+For this assignment, application and package remain together so reviewers can install and run the solution without registry access. Publishing is a future distribution step, not a prerequisite for demonstrating reuse.
 
-## Architectural tradeoffs
+Production adoption would also need:
 
-- **One package, layered internally.** One package keeps versioning simple for 100+ consumers. Separation is enforced by folder rules and the boundary script rather than by package boundaries. Splitting it later (for example into a core package and a Refine adapter) needs only new entry points.
-- **Refine is the single source of truth for server state.** Filter UI state is *derived* from Refine's filters (`fromRefineFilters`), not stored twice; that also makes `syncWithLocation` work. Local state is limited to UI concerns: drawer mode, the pending delete, and saving.
-- **Relation resolution without hook loops.** `RelationResolver` renders one `RelationLookupStep` per relation, and each makes a single `useMany` call over the unique foreign keys on the current page. Hooks keep fixed positions, there are no per-row requests, and the cache belongs to Refine. Relation columns are "deferred" (`{ relation, bind(lookup) }`), so factories stay pure while still receiving resolved data.
-- **`valueField` must be what `getMany` matches**, normally the related primary key. Batch lookups use `dataProvider.getMany`. Relations on other fields need a custom `relationSelect` and a custom resolution hook.
-- **Relation fields take an explicit `name`.** `fields.relation("authorId", bookAuthor)` checks the name against the *form* type, which may differ from the record type the relation was declared on.
-- **Mutations use only `mutateAsync`.** Refine 5.0.12's published typings for `useCreate`/`useUpdate` disagree with their runtime return shape. The controller relies only on `mutateAsync`, which both shapes provide, and tracks the saving flag itself.
-- **Text filters apply on every keystroke.** Refine's `useTable` has no debounce. Add one in a custom `FilterControl` if your API needs it.
-- **Default English strings** live in `defaultTexts`. Full i18n is left to the host, either by passing `texts` or by wiring Refine's `i18nProvider` into them.
+- a tested compatibility matrix for the peer dependencies (React, antd, Refine)
+- release notes and migration guides for breaking changes
+- controlled upgrade PRs (for example Renovate) so each repository adopts new versions deliberately
 
-## Intentionally out of scope
+## 12. Known limitations and possible improvements
 
-There is no backend, fake API, seed data, authentication, permissions-aware UI, notification provider, deployment or publishing automation. `apps/library-app` is wired to `@refinedev/simple-rest` at `VITE_API_URL` (default `/api`), but no server is included.
+- **Text filters query on every keystroke:** Refine's `useTable` has no debounce. A debounced text filter control would reduce requests.
+- **No sorting by author name:** the relation column is not sortable, because the API can only sort books by `authorId`.
+- **json-server sorting is case-sensitive:** it orders values with lodash `orderBy`, so lower-case names would sort after upper-case ones. A real API would sort with collation.
+- **Relation resolution uses `getMany`:** a relation's `valueField` must be the related record's id. Relations on other fields would need a custom resolver.
+- **No server-side validation:** the fake API does not validate payloads beyond ids and the delete rule. The controller already maps a Refine `HttpError.errors` response onto form fields, but this API never sends one.
+- **Refine typing mismatch:** Refine 5.0.12's published typings for `useCreate`/`useUpdate` disagree with their runtime return value. The controller relies only on `mutateAsync` and tracks its own saving flag.
+- **No committed end-to-end suite:** browser flows were verified with a Playwright script during development, but that script is not committed. A committed Playwright suite against the fake API would make the checks repeatable in CI.
+- **English UI text only:** labels and validation messages are English. `ResourceTexts` can be overridden, but no i18n provider is wired in.
+- **Large single bundle:** the app ships as one bundle (about 1.4 MB, mostly antd), with no route-level code splitting.

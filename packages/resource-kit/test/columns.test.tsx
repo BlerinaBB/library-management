@@ -3,9 +3,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { createColumnFactories } from "../src/columns/createColumnFactories";
 import { resolveColumns } from "../src/columns/resolveColumns";
-import { buildRelationLookup, collectForeignIds, relationKey } from "../src/config/relations";
+import { PENDING_LOOKUP, buildRelationLookup, collectForeignIds, relationKey } from "../src/config/relations";
 import type { TableColumn } from "../src/types/column";
-import { type Author, type Book, book, bookAuthor } from "./fixtures";
+import { AUTHOR_A, AUTHOR_B, type Author, type Book, book, bookAuthor } from "./fixtures";
 
 const columns = createColumnFactories({ locale: "en-US", currency: "USD", emptyText: "n/a" });
 
@@ -47,22 +47,36 @@ describe("column factories", () => {
 });
 
 describe("relation columns", () => {
-  const records = [book({ id: 1, authorId: 7 }), book({ id: 2, authorId: 7 }), book({ id: 3, authorId: 9 }), book({ id: 4, authorId: null })];
+  const records = [
+    book({ id: "b1", authorId: AUTHOR_B }),
+    book({ id: "b2", authorId: AUTHOR_A }),
+    book({ id: "b3", authorId: AUTHOR_B }),
+    book({ id: "b4", authorId: null }),
+  ];
 
-  it("collect unique foreign keys once per page", () => {
-    expect(collectForeignIds(records, bookAuthor)).toEqual([7, 9]);
+  it("collect unique UUID foreign keys once per page, in a stable order", () => {
+    expect(collectForeignIds(records, bookAuthor)).toEqual([AUTHOR_A, AUTHOR_B]);
   });
 
   it("render resolved labels, missing references and unresolved keys", () => {
-    const lookup = buildRelationLookup<Author>(bookAuthor, [{ id: 7, name: "James Joyce" }]);
+    const lookup = buildRelationLookup<Author>(bookAuthor, [{ id: AUTHOR_A, name: "James Joyce" }]);
     const [column] = resolveColumns([columns.relation<Book>(bookAuthor, { renderMissing: (id) => `missing ${id}` })], {
       [relationKey(bookAuthor)]: lookup,
     });
-    expect(cell(column!, records[0]!)).toBe("James Joyce");
-    expect(cell(column!, records[2]!)).toBe("missing 9");
+    expect(cell(column!, records[1]!)).toBe("James Joyce");
+    expect(cell(column!, records[0]!)).toBe(`missing ${AUTHOR_B}`);
     expect(cell(column!, records[3]!)).toBe("n/a");
 
     const [unresolved] = resolveColumns([columns.relation<Book>(bookAuthor)]);
-    expect(cell(unresolved!, records[0]!)).toBe("7");
+    expect(cell(unresolved!, records[1]!)).toBe(AUTHOR_A);
+  });
+
+  it("render a loading indicator, not a missing reference, while related records load", () => {
+    const [pending] = resolveColumns([columns.relation<Book>(bookAuthor, { renderMissing: (id) => `missing ${id}` })], {
+      [relationKey(bookAuthor)]: PENDING_LOOKUP,
+    });
+    const html = cell(pending!, records[0]!);
+    expect(html).toContain("ant-spin");
+    expect(html).not.toContain("missing");
   });
 });

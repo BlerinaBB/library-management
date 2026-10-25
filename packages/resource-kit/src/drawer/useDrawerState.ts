@@ -19,3 +19,8 @@ export function useDrawerState(initial: DrawerState = CLOSED): DrawerStateApi {
   const close = useCallback(() => setState(CLOSED), []);
   return useMemo(() => ({ state, openCreate, openEdit, close }), [state, openCreate, openEdit, close]);
 }
+
+/** Identifies what the drawer shows: `closed`, `create` or `edit:<id>`. */
+export function drawerStateKey(state: DrawerState): string {
+  return state.mode === "edit" ? `edit:${state.id}` : state.mode;
+}

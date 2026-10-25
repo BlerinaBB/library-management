@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { ReactNode } from "react";
-import { relationKey } from "../config/relations";
+import { PENDING_LOOKUP, relationKey } from "../config/relations";
 import type { RelationLookupOptions } from "../hooks/useRelationLookup";
 import { useRelationLookup } from "../hooks/useRelationLookup";
 import type { AnyRelation, RelationData } from "../types/relation";
@@ -21,7 +21,9 @@ export interface RelationLookupStepProps<T> extends RelationLookupOptions {
 export function RelationLookupStep<T>({ relation, rest, records, resolved, loading, children, ...options }: RelationLookupStepProps<T>) {
   const { lookup, isLoading } = useRelationLookup(relation, records, options);
   const key = relationKey(relation);
-  const data = useMemo(() => (lookup ? { ...resolved, [key]: lookup } : resolved), [resolved, key, lookup]);
+  // Loading → PENDING_LOOKUP (cells show a spinner); failed → no entry (cells fall back to raw keys).
+  const current = lookup ?? (isLoading ? PENDING_LOOKUP : undefined);
+  const data = useMemo(() => (current ? { ...resolved, [key]: current } : resolved), [resolved, key, current]);
   const stillLoading = loading || isLoading;
   const [next, ...remaining] = rest;
 

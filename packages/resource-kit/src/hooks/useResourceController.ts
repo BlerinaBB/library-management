@@ -2,9 +2,9 @@ import { useCreate, useDelete, useOne, useTable, useUpdate } from "@refinedev/co
 import type { BaseKey, BaseRecord, CrudSort, HttpError, IQueryKeys, MetaQuery } from "@refinedev/core";
 import { Form } from "antd";
 import type { FormInstance, TableProps } from "antd";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { tableRelations } from "../config/defineResource";
-import { useDrawerState } from "../drawer/useDrawerState";
+import { drawerStateKey, useDrawerState } from "../drawer/useDrawerState";
 import type { DrawerStateApi } from "../drawer/useDrawerState";
 import type { DataTableProps } from "../table/DataTable";
 import type { ResourceFormProps } from "../form/ResourceForm";
@@ -143,8 +143,13 @@ export function useResourceController<TRecord, TForm = TRecord, TVariables = Par
     meta,
     queryOptions: { enabled: editId !== undefined },
   });
-  const editedRecord = editId !== undefined ? (recordQuery.data?.data as TRecord | undefined) : undefined;
-  const recordLoading = editId !== undefined && recordQuery.isLoading;
+  // While a new id loads, the query can still expose the previously edited record as
+  // placeholder data (with `isLoading` false). Accept only the record that matches the
+  // drawer, and treat anything else as loading, so the form never resets to stale values.
+  const loadedRecord = recordQuery.data?.data as TRecord | undefined;
+  const editedRecord =
+    editId !== undefined && loadedRecord && String(getRecordId(loadedRecord)) === editId ? loadedRecord : undefined;
+  const recordLoading = editId !== undefined && !editedRecord && !recordQuery.isError;
 
   const initialValues = useMemo((): Partial<TForm> | undefined => {
     if (drawer.state.mode === "create") return config.form.initialValues;
@@ -160,15 +165,20 @@ export function useResourceController<TRecord, TForm = TRecord, TVariables = Par
   const updateMutation = useUpdate<BaseRecord, HttpError, TVariables>();
   const deleteMutation = useDelete<BaseRecord, HttpError>();
   const [saving, setSaving] = useState(false);
+  // Synchronous guards: pressing Enter submits the form even while the save button shows
+  // its spinner, and state updates are not visible until the next render.
+  const savingRef = useRef(false);
+  const deletingRef = useRef(false);
 
   const save = useCallback(
     async (values: TForm) => {
       const state = drawer.state;
-      if (state.mode === "closed") return;
+      if (state.mode === "closed" || savingRef.current) return;
       const context: FormConversionContext<TRecord> = { mode: state.mode, record: editedRecord };
       const variables = conversions.toVariables
         ? conversions.toVariables(values, context)
         : (values as unknown as TVariables);
+      savingRef.current = true;
       setSaving(true);
       try {
         const response =
@@ -181,6 +191,7 @@ export function useResourceController<TRecord, TForm = TRecord, TVariables = Par
         // Refine reports the error through the host's notification provider; keep the drawer open.
         applyServerErrors(form, error);
       } finally {
+        savingRef.current = false;
         setSaving(false);
       }
     },
@@ -192,8 +203,9 @@ export function useResourceController<TRecord, TForm = TRecord, TVariables = Par
   const requestDelete = useCallback((record: TRecord) => setDeleteTarget(() => record), []);
   const cancelDelete = useCallback(() => setDeleteTarget(null), []);
   const confirmDelete = useCallback(async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || deletingRef.current) return;
     const id = getRecordId(deleteTarget);
+    deletingRef.current = true;
     try {
       await deleteMutation.mutateAsync({ resource, id, dataProviderName, meta, invalidates });
       if (editId !== undefined && editId === String(id)) drawer.close();
@@ -201,6 +213,8 @@ export function useResourceController<TRecord, TForm = TRecord, TVariables = Par
       onDeleted?.(deleteTarget);
     } catch {
       // Reported by Refine; the dialog stays open so the user can retry or cancel.
+    } finally {
+      deletingRef.current = false;
     }
   }, [deleteTarget, getRecordId, deleteMutation, resource, dataProviderName, meta, invalidates, editId, drawer, onDeleted]);
 
@@ -242,6 +256,8 @@ export function useResourceController<TRecord, TForm = TRecord, TVariables = Par
       form,
       fields: config.form.fields,
       initialValues,
+      // Re-apply initial values when the drawer switches record and once the record is ready.
+      resetKey: `${drawerStateKey(drawer.state)}|${recordLoading ? "pending" : "ready"}`,
       onFinish: save,
       loading: recordLoading,
     },

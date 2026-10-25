@@ -7,18 +7,36 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build -w @library/resource-kit && npm run build -w library-app",
-    "typecheck": "npm run typecheck -w @library/resource-kit && npm run typecheck -w library-app",
-    "test": "npm run test -w @library/resource-kit",
+    "dev": "npm run build:kit && concurrently --kill-others --names kit,api,app --prefix-colors blue,magenta,green \"npm:dev:kit\" \"npm:api\" \"npm:dev:app\"",
+    "dev:kit": "npm --prefix packages/resource-kit run dev",
+    "dev:app": "npm --prefix apps/library-app run dev",
+    "api": "node fake-api/server.mjs",
+    "seed:reset": "node fake-api/reset.mjs",
+    "build": "npm run build:kit && npm --prefix apps/library-app run build",
+    "build:kit": "npm --prefix packages/resource-kit run build",
+    "storybook": "npm --prefix packages/resource-kit run storybook",
+    "build-storybook": "npm --prefix packages/resource-kit run build-storybook",
+    "typecheck": "npm run build:kit && npm --prefix packages/resource-kit run typecheck && npm --prefix apps/library-app run typecheck",
+    "lint": "eslint .",
+    "test": "npm --prefix packages/resource-kit run test",
     "check:cycles": "madge --circular --extensions ts,tsx packages/resource-kit/src apps/library-app/src",
     "check:boundaries": "node scripts/check-boundaries.mjs",
-    "verify": "npm run build -w @library/resource-kit && npm run typecheck && npm test && npm run check:cycles && npm run check:boundaries && npm run build -w library-app"
+    "check:consumer": "node scripts/check-consumer.mjs",
+    "verify": "npm run typecheck && npm run lint && npm test && npm run check:cycles && npm run check:boundaries && npm --prefix apps/library-app run build && npm run build-storybook && npm run check:consumer"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.6",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "json-server": "0.17.4",
     "madge": "^8.0.0",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.0"
   },
   "engines": {
-    "node": ">=20"
-  }
+    "node": ">=20.19"
+  },
+  "//": "Scripts use npm --prefix rather than -w: npm 9.6.x exits 0 when a workspace script fails, which would hide failures in verify."
 }

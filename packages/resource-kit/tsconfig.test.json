@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals", "node"],
+    // Tests, stories and Storybook config import the package by its public name, mapped to
+    // the public entry (as Storybook's and Vitest's aliases do). Applications never use this.
+    "paths": { "@library/resource-kit": ["./src/index.ts"] }
   },
-  "include": ["src", "test"]
+  "include": ["src", "test", "stories", ".storybook"]
 }

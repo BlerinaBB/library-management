@@ -1,4 +1,4 @@
-import { Tag, Typography } from "antd";
+import { Spin, Tag, Typography } from "antd";
 import type { ReactNode } from "react";
 import { humanize } from "../config/defineResource";
 import {
@@ -9,7 +9,7 @@ import {
   isMissing,
   mergeFormat,
 } from "../config/formatting";
-import { getRelationLabel } from "../config/relations";
+import { PENDING_LOOKUP, getRelationLabel } from "../config/relations";
 import type { ColumnOptions, RelationColumn, RowAction, TableColumn } from "../types/column";
 import type { FormatOptions } from "../types/format";
 import type { BooleanKey, DateKey, DateInput, EnumKey, IdKey, NumberKey, RecordId, StringKey } from "../types/keys";
@@ -154,8 +154,9 @@ export function createColumnFactories(defaults: FormatOptions = {}): ColumnFacto
         bind: (lookup) =>
           base(relation.foreignKey, rest, {}, (value: RecordId | null | undefined, record) => {
             if (isMissing(value)) return emptyOf(format);
-            // Unresolved (still loading or not requested): fall back to the raw key.
+            // Not requested (no relation data supplied): fall back to the raw key.
             if (!lookup) return String(value);
+            if (lookup === PENDING_LOOKUP) return <Spin size="small" />;
             const related = lookup.get(String(value));
             if (related === undefined) {
               return renderMissing ? (

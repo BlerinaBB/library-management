@@ -1,0 +1,638 @@
+{
+  "authors": [
+    {
+      "id": "dfdc55c3-1a86-4533-b0f1-1490bcbccf75",
+      "name": "Chinua Achebe",
+      "nationality": "Nigerian",
+      "birthDate": "1930-11-16",
+      "bio": "Novelist and critic, author of the African Trilogy.",
+      "active": false
+    },
+    {
+      "id": "fcf55378-bddc-4321-97c5-85858b957f7d",
+      "name": "Margaret Atwood",
+      "nationality": "Canadian",
+      "birthDate": "1939-11-18",
+      "bio": "Poet and novelist known for speculative fiction.",
+      "active": true
+    },
+    {
+      "id": "afe46243-9881-427a-8482-a7a267b9ab5d",
+      "name": "Jorge Luis Borges",
+      "nationality": "Argentine",
+      "birthDate": "1899-08-24",
+      "bio": "Writer of labyrinthine short stories and essays.",
+      "active": false
+    },
+    {
+      "id": "1fbc5b05-c43a-458e-a3bf-cc380fff75aa",
+      "name": "Octavia E. Butler",
+      "nationality": "American",
+      "birthDate": "1947-06-22",
+      "bio": "Science fiction author and MacArthur Fellow.",
+      "active": false
+    },
+    {
+      "id": "8e5bc0cc-4211-42b2-b9c5-2d1d74ff88b9",
+      "name": "Italo Calvino",
+      "nationality": "Italian",
+      "birthDate": "1923-10-15",
+      "bio": null,
+      "active": false
+    },
+    {
+      "id": "fdba2330-2716-451c-ab6d-53505da7300d",
+      "name": "Ted Chiang",
+      "nationality": "American",
+      "birthDate": "1967-10-20",
+      "bio": "Short fiction exploring science and philosophy.",
+      "active": true
+    },
+    {
+      "id": "f036cb8e-cee0-4941-8819-f16b4cb24e50",
+      "name": "Marie Curie",
+      "nationality": "Polish",
+      "birthDate": "1867-11-07",
+      "bio": "Physicist and chemist; her writings on radioactivity.",
+      "active": false
+    },
+    {
+      "id": "feee6951-faad-463a-8b16-ba7d70e8087d",
+      "name": "Annie Ernaux",
+      "nationality": "French",
+      "birthDate": "1940-09-01",
+      "bio": "Memoirist and Nobel laureate.",
+      "active": true
+    },
+    {
+      "id": "7e2f3410-e29e-45ed-8bc6-bc51e81de78d",
+      "name": "Gabriel García Márquez",
+      "nationality": "Colombian",
+      "birthDate": "1927-03-06",
+      "bio": "Pioneer of magical realism.",
+      "active": false
+    },
+    {
+      "id": "ea093c54-972a-4d4a-ab74-afa7b22b18f7",
+      "name": "Seamus Heaney",
+      "nationality": "Irish",
+      "birthDate": "1939-04-13",
+      "bio": "Poet and translator of Beowulf.",
+      "active": false
+    },
+    {
+      "id": "7b4c9bee-bd1d-4361-9f58-a5368e6374fb",
+      "name": "Kazuo Ishiguro",
+      "nationality": "British",
+      "birthDate": "1954-11-08",
+      "bio": "Novelist of memory and self-deception.",
+      "active": true
+    },
+    {
+      "id": "bdf5aa5a-18c0-4bdc-a564-5df32c8ae3b6",
+      "name": "James Joyce",
+      "nationality": "Irish",
+      "birthDate": "1882-02-02",
+      "bio": "Modernist novelist.",
+      "active": false
+    },
+    {
+      "id": "99add35b-6015-4249-a00a-6f56ed2fca30",
+      "name": "Ismail Kadare",
+      "nationality": "Albanian",
+      "birthDate": "1936-01-28",
+      "bio": "Novelist and poet, Man Booker International winner.",
+      "active": false
+    },
+    {
+      "id": "db0cbaee-7956-4579-98c1-d582caca7ac4",
+      "name": "Ursula K. Le Guin",
+      "nationality": "American",
+      "birthDate": "1929-10-21",
+      "bio": "Speculative fiction and essays.",
+      "active": false
+    },
+    {
+      "id": "7de01bdb-5bf2-405a-87bf-1bdf76a9004e",
+      "name": "Hilary Mantel",
+      "nationality": "British",
+      "birthDate": null,
+      "bio": "Historical novelist.",
+      "active": false
+    },
+    {
+      "id": "fd27af25-00e1-4b22-8d43-d72f23cce8a3",
+      "name": "Toni Morrison",
+      "nationality": "American",
+      "birthDate": "1931-02-18",
+      "bio": "Novelist and Nobel laureate.",
+      "active": false
+    },
+    {
+      "id": "d50ff7f6-f7e6-412a-9864-b22896ee1229",
+      "name": "Haruki Murakami",
+      "nationality": "Japanese",
+      "birthDate": "1949-01-12",
+      "bio": "Novelist and translator.",
+      "active": true
+    },
+    {
+      "id": "c4ed8afd-ff3b-4db2-800f-817b78004c3a",
+      "name": "Mary Oliver",
+      "nationality": "American",
+      "birthDate": "1935-09-10",
+      "bio": "Poet of the natural world.",
+      "active": false
+    },
+    {
+      "id": "51544d00-cef8-4ce2-a3d9-4a748d845fe7",
+      "name": "Orhan Pamuk",
+      "nationality": "Turkish",
+      "birthDate": "1952-06-07",
+      "bio": null,
+      "active": true
+    },
+    {
+      "id": "361eaef2-7b48-4ced-9a59-cb02e82551ae",
+      "name": "Carl Sagan",
+      "nationality": "American",
+      "birthDate": "1934-11-09",
+      "bio": "Astronomer and science communicator.",
+      "active": false
+    },
+    {
+      "id": "cc03acfb-3056-42d6-a0ad-2980fb2522d5",
+      "name": "Wisława Szymborska",
+      "nationality": "Polish",
+      "birthDate": "1923-07-02",
+      "bio": "Poet and Nobel laureate.",
+      "active": false
+    },
+    {
+      "id": "36de0c76-9461-4e58-98e3-4128ea0fbaee",
+      "name": "Olga Tokarczuk",
+      "nationality": "Polish",
+      "birthDate": "1962-01-29",
+      "bio": "Novelist and Nobel laureate.",
+      "active": true
+    },
+    {
+      "id": "1ab655fd-5427-4c49-81a7-0c0b185463f6",
+      "name": "Walter Isaacson",
+      "nationality": "American",
+      "birthDate": "1952-05-20",
+      "bio": "Biographer and journalist.",
+      "active": true
+    },
+    {
+      "id": "d7754775-cf0b-493e-a300-49239b9219d9",
+      "name": "Ocean Vuong",
+      "nationality": "American",
+      "birthDate": "1988-10-14",
+      "bio": "Poet and novelist.",
+      "active": true
+    }
+  ],
+  "books": [
+    {
+      "id": "46e3ba6e-1f44-44bb-b4f1-c936f4c6a0b1",
+      "title": "Things Fall Apart",
+      "isbn": "9780001000001",
+      "genre": "fiction",
+      "publishedDate": "1958-06-17",
+      "pageCount": 209,
+      "price": 12.5,
+      "inStock": true,
+      "authorId": "dfdc55c3-1a86-4533-b0f1-1490bcbccf75"
+    },
+    {
+      "id": "e8b749b0-3761-4853-b38c-dea2c02d32af",
+      "title": "No Longer at Ease",
+      "isbn": "9780001079199",
+      "genre": "fiction",
+      "publishedDate": "1960-09-01",
+      "pageCount": 194,
+      "price": 11,
+      "inStock": false,
+      "authorId": "dfdc55c3-1a86-4533-b0f1-1490bcbccf75"
+    },
+    {
+      "id": "a60f95f9-04ff-4333-afc5-78b5ca1f9c21",
+      "title": "Arrow of God",
+      "isbn": "9780001158382",
+      "genre": "fiction",
+      "publishedDate": "1964-01-01",
+      "pageCount": 287,
+      "price": 13.9,
+      "inStock": true,
+      "authorId": "dfdc55c3-1a86-4533-b0f1-1490bcbccf75"
+    },
+    {
+      "id": "2be5c5d8-adfb-4551-a6fa-9803ffbc15cc",
+      "title": "The Handmaid's Tale",
+      "isbn": "9780001237575",
+      "genre": "fiction",
+      "publishedDate": "1985-08-17",
+      "pageCount": 311,
+      "price": 14.99,
+      "inStock": true,
+      "authorId": "fcf55378-bddc-4321-97c5-85858b957f7d"
+    },
+    {
+      "id": "710effa9-c61f-4e18-b80b-b44fc56e8375",
+      "title": "Oryx and Crake",
+      "isbn": "9780001316768",
+      "genre": "fiction",
+      "publishedDate": "2003-05-06",
+      "pageCount": 376,
+      "price": 15.5,
+      "inStock": false,
+      "authorId": "fcf55378-bddc-4321-97c5-85858b957f7d"
+    },
+    {
+      "id": "edb43a53-19f4-4e7b-9e63-10e86591c31f",
+      "title": "Ficciones",
+      "isbn": "9780001395954",
+      "genre": "fiction",
+      "publishedDate": "1944-01-01",
+      "pageCount": 174,
+      "price": 10,
+      "inStock": true,
+      "authorId": "afe46243-9881-427a-8482-a7a267b9ab5d"
+    },
+    {
+      "id": "b653d955-38ec-4b66-be4e-1118a8c1485f",
+      "title": "Kindred",
+      "isbn": "9780001475144",
+      "genre": "fiction",
+      "publishedDate": "1979-06-01",
+      "pageCount": 264,
+      "price": 13,
+      "inStock": true,
+      "authorId": "1fbc5b05-c43a-458e-a3bf-cc380fff75aa"
+    },
+    {
+      "id": "f35940cc-cac4-4621-a185-3d47410bcca2",
+      "title": "Parable of the Sower",
+      "isbn": "9780001554337",
+      "genre": "fiction",
+      "publishedDate": "1993-10-01",
+      "pageCount": 299,
+      "price": 12,
+      "inStock": false,
+      "authorId": "1fbc5b05-c43a-458e-a3bf-cc380fff75aa"
+    },
+    {
+      "id": "406fa412-0b7a-4abd-8878-fca9ad2dfd79",
+      "title": "Invisible Cities",
+      "isbn": "9780001633520",
+      "genre": "fiction",
+      "publishedDate": "1972-11-01",
+      "pageCount": 165,
+      "price": 11.5,
+      "inStock": true,
+      "authorId": "8e5bc0cc-4211-42b2-b9c5-2d1d74ff88b9"
+    },
+    {
+      "id": "7a82bb34-0f45-435d-9b63-58f62058a8df",
+      "title": "Stories of Your Life and Others",
+      "isbn": "9780001712713",
+      "genre": "fiction",
+      "publishedDate": "2002-07-01",
+      "pageCount": 281,
+      "price": 16,
+      "inStock": true,
+      "authorId": "fdba2330-2716-451c-ab6d-53505da7300d"
+    },
+    {
+      "id": "e2301c9d-abfe-4efb-b872-520636c17e6d",
+      "title": "Exhalation",
+      "isbn": "9780001791909",
+      "genre": "fiction",
+      "publishedDate": "2019-05-07",
+      "pageCount": 350,
+      "price": 18,
+      "inStock": true,
+      "authorId": "fdba2330-2716-451c-ab6d-53505da7300d"
+    },
+    {
+      "id": "02803639-dd48-42f6-bdcf-36e7e1677ba2",
+      "title": "Radioactive Substances",
+      "isbn": "9780001871090",
+      "genre": "science",
+      "publishedDate": "1904-01-01",
+      "pageCount": 94,
+      "price": 0,
+      "inStock": true,
+      "authorId": "f036cb8e-cee0-4941-8819-f16b4cb24e50"
+    },
+    {
+      "id": "5552b409-f62d-474b-aff9-726ee5ba8e7c",
+      "title": "The Years",
+      "isbn": "9780001950283",
+      "genre": "biography",
+      "publishedDate": "2008-02-01",
+      "pageCount": 232,
+      "price": 14,
+      "inStock": false,
+      "authorId": "feee6951-faad-463a-8b16-ba7d70e8087d"
+    },
+    {
+      "id": "05b23d9e-3d44-41b3-9421-c73a51dbb70e",
+      "title": "One Hundred Years of Solitude",
+      "isbn": "9780002029476",
+      "genre": "fiction",
+      "publishedDate": "1967-05-30",
+      "pageCount": 417,
+      "price": 17.5,
+      "inStock": true,
+      "authorId": "7e2f3410-e29e-45ed-8bc6-bc51e81de78d"
+    },
+    {
+      "id": "34836a98-1ec4-4bf9-847e-5d6109722063",
+      "title": "Love in the Time of Cholera",
+      "isbn": "9780002108669",
+      "genre": "fiction",
+      "publishedDate": "1985-01-01",
+      "pageCount": 348,
+      "price": 15,
+      "inStock": true,
+      "authorId": "7e2f3410-e29e-45ed-8bc6-bc51e81de78d"
+    },
+    {
+      "id": "6d2f737b-0d44-45ac-a72a-4abe442fdeba",
+      "title": "Death of a Naturalist",
+      "isbn": "9780002187855",
+      "genre": "poetry",
+      "publishedDate": "1966-05-19",
+      "pageCount": 57,
+      "price": 9.5,
+      "inStock": true,
+      "authorId": "ea093c54-972a-4d4a-ab74-afa7b22b18f7"
+    },
+    {
+      "id": "2ac5dc90-ce67-4542-b501-c195d0ce91e4",
+      "title": "North",
+      "isbn": "9780002267045",
+      "genre": "poetry",
+      "publishedDate": "1975-06-01",
+      "pageCount": 73,
+      "price": 9.5,
+      "inStock": false,
+      "authorId": "ea093c54-972a-4d4a-ab74-afa7b22b18f7"
+    },
+    {
+      "id": "dadf88a4-4077-4a7d-8843-53559c2462ff",
+      "title": "The Remains of the Day",
+      "isbn": "9780002346238",
+      "genre": "fiction",
+      "publishedDate": "1989-05-01",
+      "pageCount": 258,
+      "price": 13.5,
+      "inStock": true,
+      "authorId": "7b4c9bee-bd1d-4361-9f58-a5368e6374fb"
+    },
+    {
+      "id": "af130e70-b97b-4194-9bc5-b49d1921e90b",
+      "title": "Never Let Me Go",
+      "isbn": "9780002425421",
+      "genre": "fiction",
+      "publishedDate": "2005-03-03",
+      "pageCount": 288,
+      "price": 14,
+      "inStock": true,
+      "authorId": "7b4c9bee-bd1d-4361-9f58-a5368e6374fb"
+    },
+    {
+      "id": "ba28f21f-5a8f-4328-8ad9-1f1cf432bc16",
+      "title": "Dubliners",
+      "isbn": "9780002504614",
+      "genre": "fiction",
+      "publishedDate": "1914-06-15",
+      "pageCount": 152,
+      "price": 8,
+      "inStock": true,
+      "authorId": "bdf5aa5a-18c0-4bdc-a564-5df32c8ae3b6"
+    },
+    {
+      "id": "72075701-ee87-4101-af01-9305e569f153",
+      "title": "Ulysses",
+      "isbn": "9780002583800",
+      "genre": "fiction",
+      "publishedDate": "1922-02-02",
+      "pageCount": 730,
+      "price": 19.99,
+      "inStock": false,
+      "authorId": "bdf5aa5a-18c0-4bdc-a564-5df32c8ae3b6"
+    },
+    {
+      "id": "1b876b90-ecaf-43d2-ad22-7de5b47e5589",
+      "title": "Chronicle in Stone",
+      "isbn": "9780002662994",
+      "genre": "fiction",
+      "publishedDate": "1971-01-01",
+      "pageCount": 304,
+      "price": 14.5,
+      "inStock": true,
+      "authorId": "99add35b-6015-4249-a00a-6f56ed2fca30"
+    },
+    {
+      "id": "b6575c4c-5d18-422b-a3ca-9ed28ddb84fa",
+      "title": "The General of the Dead Army",
+      "isbn": "9780002742184",
+      "genre": "fiction",
+      "publishedDate": "1963-01-01",
+      "pageCount": 256,
+      "price": 13,
+      "inStock": true,
+      "authorId": "99add35b-6015-4249-a00a-6f56ed2fca30"
+    },
+    {
+      "id": "1c8800be-af95-4dda-9297-e5a722efcb07",
+      "title": "Broken April",
+      "isbn": "9780002821377",
+      "genre": "fiction",
+      "publishedDate": "1978-01-01",
+      "pageCount": 216,
+      "price": 12.5,
+      "inStock": false,
+      "authorId": "99add35b-6015-4249-a00a-6f56ed2fca30"
+    },
+    {
+      "id": "f1f82ced-3690-4dc2-a1f2-b320a56eb471",
+      "title": "The Left Hand of Darkness",
+      "isbn": "9780002900560",
+      "genre": "fiction",
+      "publishedDate": "1969-03-01",
+      "pageCount": 304,
+      "price": 13,
+      "inStock": true,
+      "authorId": "db0cbaee-7956-4579-98c1-d582caca7ac4"
+    },
+    {
+      "id": "34b52047-9238-4d61-b476-45098be84470",
+      "title": "The Dispossessed",
+      "isbn": "9780002979757",
+      "genre": "fiction",
+      "publishedDate": "1974-05-01",
+      "pageCount": 387,
+      "price": 14,
+      "inStock": true,
+      "authorId": "db0cbaee-7956-4579-98c1-d582caca7ac4"
+    },
+    {
+      "id": "1ed6d1cd-cd24-46c9-9554-aaa7b6bc3d75",
+      "title": "Wolf Hall",
+      "isbn": "9780003058949",
+      "genre": "fiction",
+      "publishedDate": "2009-04-30",
+      "pageCount": 653,
+      "price": 18.5,
+      "inStock": true,
+      "authorId": "7de01bdb-5bf2-405a-87bf-1bdf76a9004e"
+    },
+    {
+      "id": "7182d90b-bd70-4b5f-85d1-fbcee2db2d75",
+      "title": "Beloved",
+      "isbn": "9780003138139",
+      "genre": "fiction",
+      "publishedDate": "1987-09-02",
+      "pageCount": 324,
+      "price": 15,
+      "inStock": true,
+      "authorId": "fd27af25-00e1-4b22-8d43-d72f23cce8a3"
+    },
+    {
+      "id": "4d092942-63fb-4574-8bc8-da29ed72c2a3",
+      "title": "Norwegian Wood",
+      "isbn": "9780003217322",
+      "genre": "fiction",
+      "publishedDate": "1987-09-04",
+      "pageCount": 296,
+      "price": 14.5,
+      "inStock": true,
+      "authorId": "d50ff7f6-f7e6-412a-9864-b22896ee1229"
+    },
+    {
+      "id": "e5be133e-8ce6-4189-b85d-c3396554ec82",
+      "title": "What I Talk About When I Talk About Running",
+      "isbn": "9780003296518",
+      "genre": "biography",
+      "publishedDate": "2007-10-01",
+      "pageCount": 180,
+      "price": 12,
+      "inStock": false,
+      "authorId": "d50ff7f6-f7e6-412a-9864-b22896ee1229"
+    },
+    {
+      "id": "656a1f0d-4d23-4076-9009-fc42dcda23e2",
+      "title": "Devotions",
+      "isbn": "9780003375701",
+      "genre": "poetry",
+      "publishedDate": "2017-10-10",
+      "pageCount": 480,
+      "price": 20,
+      "inStock": true,
+      "authorId": "c4ed8afd-ff3b-4db2-800f-817b78004c3a"
+    },
+    {
+      "id": "e46539a1-88e1-4d2e-9915-362e303e95af",
+      "title": "Snow",
+      "isbn": "9780003454895",
+      "genre": "fiction",
+      "publishedDate": "2002-01-01",
+      "pageCount": 436,
+      "price": 16,
+      "inStock": true,
+      "authorId": "51544d00-cef8-4ce2-a3d9-4a748d845fe7"
+    },
+    {
+      "id": "d5b10336-26e8-4e4c-8f83-5e47c19baedd",
+      "title": "Cosmos",
+      "isbn": "9780003534085",
+      "genre": "science",
+      "publishedDate": "1980-10-01",
+      "pageCount": 365,
+      "price": 17,
+      "inStock": true,
+      "authorId": "361eaef2-7b48-4ced-9a59-cb02e82551ae"
+    },
+    {
+      "id": "6e072fb0-3d69-4c08-a539-0344db9c65b9",
+      "title": "Pale Blue Dot",
+      "isbn": "9780003613278",
+      "genre": "science",
+      "publishedDate": "1994-11-01",
+      "pageCount": 429,
+      "price": 16.5,
+      "inStock": false,
+      "authorId": "361eaef2-7b48-4ced-9a59-cb02e82551ae"
+    },
+    {
+      "id": "e47296e6-89ee-4bd0-9350-5ab61c74b000",
+      "title": "View with a Grain of Sand",
+      "isbn": "9780003692464",
+      "genre": "poetry",
+      "publishedDate": "1995-01-01",
+      "pageCount": 214,
+      "price": 11,
+      "inStock": true,
+      "authorId": "cc03acfb-3056-42d6-a0ad-2980fb2522d5"
+    },
+    {
+      "id": "c5c7f240-169c-4f41-b455-12e59709338b",
+      "title": "Flights",
+      "isbn": "9780003771657",
+      "genre": "fiction",
+      "publishedDate": "2007-01-01",
+      "pageCount": 416,
+      "price": 15.5,
+      "inStock": true,
+      "authorId": "36de0c76-9461-4e58-98e3-4128ea0fbaee"
+    },
+    {
+      "id": "51d595fc-c9ca-4221-aadb-8bb9909301ab",
+      "title": "Steve Jobs",
+      "isbn": "9780003850840",
+      "genre": "biography",
+      "publishedDate": "2011-10-24",
+      "pageCount": 656,
+      "price": 19,
+      "inStock": true,
+      "authorId": "1ab655fd-5427-4c49-81a7-0c0b185463f6"
+    },
+    {
+      "id": "5d47859b-2a0c-420a-9005-c8b0d23b371b",
+      "title": "Einstein: His Life and Universe",
+      "isbn": "9780003930030",
+      "genre": "biography",
+      "publishedDate": "2007-04-10",
+      "pageCount": 704,
+      "price": 0,
+      "inStock": false,
+      "authorId": "1ab655fd-5427-4c49-81a7-0c0b185463f6"
+    },
+    {
+      "id": "5a5e8ece-2da5-4a43-99c8-cd5ed1182833",
+      "title": "Night Sky with Exit Wounds",
+      "isbn": "9780004009223",
+      "genre": "poetry",
+      "publishedDate": "2016-04-05",
+      "pageCount": 89,
+      "price": 10.5,
+      "inStock": true,
+      "authorId": "d7754775-cf0b-493e-a300-49239b9219d9"
+    },
+    {
+      "id": "835eca37-5877-4be4-9f24-18b44c4ee280",
+      "title": "On Earth We're Briefly Gorgeous",
+      "isbn": "9780004088419",
+      "genre": "fiction",
+      "publishedDate": null,
+      "pageCount": null,
+      "price": 9,
+      "inStock": false,
+      "authorId": "d7754775-cf0b-493e-a300-49239b9219d9"
+    }
+  ]
+}

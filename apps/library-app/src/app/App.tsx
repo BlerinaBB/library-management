@@ -4,10 +4,11 @@ import dataProvider from "@refinedev/simple-rest";
 import { App as AntdApp, ConfigProvider, Layout, Menu } from "antd";
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useLocation } from "react-router";
 import { AuthorsPage } from "../resources/authors/AuthorsPage";
-import { BookInventoryScreen } from "../resources/books/BookInventoryScreen";
 import { BooksPage } from "../resources/books/BooksPage";
+import { useNotificationProvider } from "./useNotificationProvider";
 
 // The host app owns API configuration; the kit never sees this URL.
+// In development "/api" is proxied to the fake API by Vite (see vite.config.ts).
 const API_URL = import.meta.env.VITE_API_URL ?? "/api";
 
 function Shell() {
@@ -22,7 +23,6 @@ function Shell() {
           items={[
             { key: "/authors", label: <Link to="/authors">Authors</Link> },
             { key: "/books", label: <Link to="/books">Books</Link> },
-            { key: "/books/inventory", label: <Link to="/books/inventory">Inventory</Link> },
           ]}
         />
       </Layout.Header>
@@ -41,9 +41,10 @@ export function App() {
           <Refine
             dataProvider={dataProvider(API_URL)}
             routerProvider={routerProvider}
+            notificationProvider={useNotificationProvider}
             resources={[
-              { name: "authors", list: "/authors" },
-              { name: "books", list: "/books" },
+              { name: "authors", list: "/authors", meta: { label: "Author" } },
+              { name: "books", list: "/books", meta: { label: "Book" } },
             ]}
             options={{ disableTelemetry: true }}
           >
@@ -52,7 +53,6 @@ export function App() {
                 <Route index element={<Navigate to="/books" replace />} />
                 <Route path="/authors" element={<AuthorsPage />} />
                 <Route path="/books" element={<BooksPage />} />
-                <Route path="/books/inventory" element={<BookInventoryScreen />} />
               </Route>
             </Routes>
           </Refine>

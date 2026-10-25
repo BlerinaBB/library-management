@@ -31,7 +31,7 @@ export const bookConfig = defineResource<Book, BookFormValues, BookVariables>({
 
   table: {
     columns: [
-      columns.id("id"),
+      columns.id("id", { width: 120, ellipsis: true }),
       columns.text("title", { sortable: true }),
       columns.relation(bookAuthor, {
         title: "Author",

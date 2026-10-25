@@ -2,6 +2,12 @@ import type { RecordId } from "../types/keys";
 import type { AnyRelation, RelationDef, RelationLookup } from "../types/relation";
 import { isMissing } from "./formatting";
 
+/**
+ * Marks a relation whose related records are still loading for the current records.
+ * Relation columns render a loading indicator for it instead of a "missing" reference.
+ */
+export const PENDING_LOOKUP: RelationLookup = new Map();
+
 /** Identity helper that checks a relation against both record types. */
 export function defineRelation<T, R>(relation: RelationDef<T, R>): RelationDef<T, R> {
   return relation;

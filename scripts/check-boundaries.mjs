@@ -37,6 +37,7 @@ for (const file of sourceFiles(kitSrc)) {
     if (specifier.startsWith(".")) {
       const target = resolve(dirname(file), specifier);
       if (!target.startsWith(kitSrc + sep)) {
+        // (also rules out imports of stories/, test/ and the app from package source)
         violations.push(`${rel(file)}: relative import leaves the package (${specifier})`);
         continue;
       }
@@ -51,6 +52,18 @@ for (const file of sourceFiles(kitSrc)) {
       violations.push(`${rel(file)}: imports "${specifier}", which is not a declared peer dependency`);
     } else if (specifier === "@refinedev/core" && PRESENTATION_LAYERS.includes(layer)) {
       violations.push(`${rel(file)}: presentation layer "${layer}" depends on Refine`);
+    }
+  }
+}
+
+// Stories document the public API: they import the kit by name only, never private paths or the app.
+for (const file of sourceFiles(join(root, "packages/resource-kit/stories"))) {
+  for (const specifier of importsOf(file)) {
+    if (specifier.startsWith("@library/resource-kit/")) violations.push(`${rel(file)}: deep import "${specifier}"`);
+    if (specifier.startsWith(".")) {
+      const target = resolve(dirname(file), specifier);
+      if (target.startsWith(kitSrc + sep) || target === kitSrc) violations.push(`${rel(file)}: imports private source (${specifier})`);
+      if (target.startsWith(join(root, "apps"))) violations.push(`${rel(file)}: imports application code (${specifier})`);
     }
   }
 }
@@ -87,4 +100,4 @@ if (violations.length) {
   console.error(`Boundary violations (${violations.length}):\n  ${violations.join("\n  ")}`);
   process.exit(1);
 }
-console.log("Boundaries OK: package ↛ app, presentation ↛ Refine, app → public exports only, dist → peers only.");
+console.log("Boundaries OK: package ↛ app, presentation ↛ Refine, app and stories → public exports only, dist → peers only.");

@@ -34,11 +34,13 @@ export function useRelationLookup<T, R = any>(
     meta: options.meta,
     queryOptions: { enabled: ids.length > 0 },
   });
-  // The query cache keeps this reference stable between renders.
-  const data = query.data?.data as R[] | undefined;
+  // While new ids load, the query exposes the previous ids' records as placeholder data.
+  // Using them would report every not-yet-loaded reference as missing, so wait instead.
+  // The query cache keeps the resolved reference stable between renders.
+  const data = query.isPlaceholderData ? undefined : (query.data?.data as R[] | undefined);
   const lookup = useMemo(() => (data ? buildRelationLookup<R>(relation, data) : undefined), [data, relation]);
   return {
     lookup: ids.length === 0 ? EMPTY_LOOKUP : lookup,
-    isLoading: ids.length > 0 && query.isLoading,
+    isLoading: ids.length > 0 && !data && !query.isError,
   };
 }

@@ -1,0 +1,76 @@
+import { Meta, Source } from "@storybook/addon-docs/blocks";
+
+<Meta title="Guide/Configuration" />
+
+# Configuration
+
+A resource is one typed object created with `defineResource<TRecord, TForm, TVariables>()`. Factories inside it infer their keys from those types, so no further generics are needed.
+
+```tsx
+const bookConfig = defineResource<Book, BookFormValues, BookVariables>({
+  name: "books",                                   // Refine resource name
+  labels: { singular: "Book", plural: "Books" },
+  relations: { author: bookAuthor },               // relation metadata (see below)
+  table: { columns: [...], filters: [...], initialSorters: [...], pageSize: 10 },
+  form: { fields: [...], initialValues: {...}, toFormValues, toVariables },
+});
+```
+
+## Columns
+
+`columns.id | text | longText | date | boolean | number | money | enum | relation | actions`. Each takes the field key plus options; options are Ant Design column props (applied last) plus `sortable` and `format`.
+
+- Key constraints: `money`/`number` accept numeric fields, `boolean` boolean fields, `date` date-like fields; `enum` options must match the field's value union. Wrong keys are compile errors.
+- Formatting: bind app-wide defaults once with `createColumnFactories({ locale, currency, dateFormat, emptyText, booleanLabels })`, override per column with `format`.
+- Missing values: `null`, `undefined` and `""` show `emptyText`; `false` and `0` are values.
+
+## Filters
+
+`filters.text | boolean | enum | relation`. A definition is pure data: `{ key, field, operator, label, … }`. Operators default sensibly (`contains`, `eq`, or `in` with `multiple`) and can be overridden with names from Refine's `CrudOperators`.
+
+Rendering (`FilterBar`), state (`filterValues`) and translation (`toRefineFilters` / `fromRefineFilters`) are separate. With the controller, Refine's filter state is the single source of truth, so filters survive refresh with `syncWithLocation`.
+
+## Fields
+
+`fields.text | textarea | date | boolean | number | money | enum | relation | custom`, a discriminated union keyed by `type`. Each accepts `label`, consumer-owned antd `rules`, `formItemProps` and the underlying control's `props`. `fields.custom(name, { render })` receives the typed `value`, `onChange` and `form`.
+
+## API records vs form values
+
+`TRecord` is what the API returns; `TForm` is what Ant Design holds (date pickers need `Dayjs`); `TVariables` is the mutation payload. Conversions are explicit and **required by the type system only when the types differ**:
+
+```ts
+toFormValues: (book) => ({ ...book, publishedDate: toDayjs(book.publishedDate) }),
+toVariables: (values, { mode, record }) => ({ ...values, publishedDate: fromDayjs(values.publishedDate) }),
+```
+
+`fromDayjs` writes date-only `YYYY-MM-DD` strings, so dates never shift across time zones. IDs are not part of the form; the API generates them on create.
+
+## Relations
+
+```ts
+export const bookAuthor = defineRelation<Book, Author>({
+  resource: "authors",   // related Refine resource
+  foreignKey: "authorId",// field on Book
+  valueField: "id",      // matched field on Author (getMany uses it)
+  labelField: "name",    // shown in cells and selects
+});
+```
+
+The same object drives `columns.relation(bookAuthor)`, `filters.relation(bookAuthor)` and `fields.relation("authorId", bookAuthor)`.
+
+**Resolution:** `RelationResolver` collects the unique foreign keys of the current page and makes one `getMany` per relation, sharing Refine's cache. Each relation is resolved in its own component, so hooks never run in a loop over configuration. Relation columns render the label when resolved, a spinner while loading, `renderMissing` for keys that do not resolve, and the raw key when no relation data was supplied.
+
+## Customization points
+
+| Need | Use |
+| --- | --- |
+| Formatting | `createColumnFactories(defaults)`, `format` per column |
+| Column details | any Ant Design column prop in the factory options |
+| Operators / filter keys | `operator`, `key` on filter factories |
+| Unusual inputs | `fields.custom` |
+| Validation | antd `rules` per field |
+| Relation labels / missing references | `formatLabel` on the relation; `renderRelated` / `renderMissing` on the column |
+| How relation options load | the `relationSelect` component (contract: `RelationSelectProps`) |
+| Row actions | `rowActions(record, defaults)` on `ResourcePage`; `columns.actions` in custom layouts |
+| After save / delete | `controllerOptions.onSaved` / `onDeleted`, `invalidates` |
+| Strings | `texts` (partial `ResourceTexts`) |

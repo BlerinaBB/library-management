@@ -3,18 +3,19 @@ import { filters } from "../src/filters/filterFactories";
 import { isEmptyFilterValue, setFilterValue } from "../src/filters/filterValues";
 import { fromRefineFilters, toRefineFilters, toRefineSorters } from "../src/hooks/refineTranslation";
 import type { FilterDef } from "../src/types/filter";
-import { type Book, bookAuthor } from "./fixtures";
+import { AUTHOR_A, type Book, bookAuthor } from "./fixtures";
 
 const definitions: FilterDef<Book>[] = [
   filters.text<Book>("title"),
   filters.boolean<Book>("inStock"),
   filters.enum<Book, "genre">("genre", { options: [{ value: "fiction", label: "Fiction" }], multiple: true }),
   filters.relation<Book>(bookAuthor),
+  filters.enum<Book, "pageCount">("pageCount", { options: [{ value: 0, label: "None" }] }),
 ];
 
 describe("filter factories", () => {
   it("applies operator defaults", () => {
-    expect(definitions.map((definition) => definition.operator)).toEqual(["contains", "eq", "in", "eq"]);
+    expect(definitions.map((definition) => definition.operator)).toEqual(["contains", "eq", "in", "eq", "eq"]);
   });
 
   it("lets consumers configure key and operator", () => {
@@ -47,14 +48,14 @@ describe("Refine filter translation", () => {
   });
 
   it("preserves false and 0", () => {
-    expect(toRefineFilters(definitions, { inStock: false, authorId: 0 })).toEqual([
+    expect(toRefineFilters(definitions, { inStock: false, pageCount: 0 })).toEqual([
       { field: "inStock", operator: "eq", value: false },
-      { field: "authorId", operator: "eq", value: 0 },
+      { field: "pageCount", operator: "eq", value: 0 },
     ]);
   });
 
   it("round-trips through Refine filters", () => {
-    const values = { title: "dub", inStock: false, genre: ["fiction"], authorId: 0 };
+    const values = { title: "dub", inStock: false, genre: ["fiction"], authorId: AUTHOR_A, pageCount: 0 };
     expect(fromRefineFilters(definitions, toRefineFilters(definitions, values))).toEqual(values);
   });
 

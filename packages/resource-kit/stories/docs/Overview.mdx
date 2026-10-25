@@ -1,0 +1,48 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Guide/Overview" />
+
+# @library/resource-kit
+
+Reusable building blocks for CRUD resource screens with **React, Refine and Ant Design**. An application describes a resource in a typed configuration object; the kit provides the table, filters, form, drawer and Refine wiring.
+
+## Component responsibilities
+
+| Piece | Responsibility | Needs Refine? |
+| --- | --- | --- |
+| `columns.*`, `filters.*`, `fields.*` | Pure factories returning typed definitions (Ant Design columns, filter and field definitions) | No |
+| `DataTable` | Ant Design `Table` (all props forwarded) + filter bar; renders filters and emits values | No |
+| `ResourceForm` | Renders field definitions in an Ant Design `Form`; no requests | No |
+| `ResourceDrawer` | Create/edit drawer driven by one `DrawerState`; title, save/cancel, form reset lifecycle | No |
+| `DeleteConfirmModal`, `ResourceHeader`, `RowActions` | Small presentational parts | No |
+| `useResourceController` | Connects a config to Refine: list, pagination, sorting, filter translation, record loading, mutations, delete flow, invalidation | Yes |
+| `RelationResolver`, `useRelationLookup` | Batch-resolve related records for the current page (one `getMany` per relation) | Yes |
+| `RefineRelationSelect` | Searchable select of related records via Refine's `useSelect` | Yes |
+| `ResourcePage` | Standard screen composed from all of the above | Yes |
+
+Stories under **Components** and **Columns** run without Refine. Stories under **Composition** use an isolated in-memory Refine data provider, recreated for every story.
+
+## Required providers
+
+- **Always:** a single copy of `react`, `react-dom`, `antd` (v6) and `dayjs` (peer dependencies).
+- **For the Refine layer** (`useResourceController`, `ResourcePage`, `RelationResolver`, `RefineRelationSelect`): `<Refine dataProvider={…}>`, with each resource registered under the same `name` as its config. Add `@tanstack/react-query` (Refine's peer).
+- **Recommended:** a Refine `notificationProvider` (mutation success and error messages are reported through it) inside antd's `<App>`. A `routerProvider` is only needed for `syncWithLocation`.
+
+## Dependency direction
+
+```
+application ──► @library/resource-kit (public entry only)
+
+resource/ (ResourcePage, RelationResolver) ──► hooks/ (Refine) ──► table, form, drawer, filters, columns ──► config ──► types
+```
+
+The package never imports application code; presentation layers never import Refine. `npm run check:boundaries` enforces both.
+
+## Controlled props and callbacks
+
+| Component | Controlled state | Callbacks |
+| --- | --- | --- |
+| `DataTable` | `filterValues` (or uncontrolled `defaultFilterValues`), `sorters`, plus every Table prop (`pagination`, `rowSelection`, …) | `onFilterValuesChange`, `onChange` and every Table callback, forwarded unchanged |
+| `ResourceForm` | `initialValues` + `resetKey`, `form`, `disabled`, `loading` | `onFinish`, every Form callback |
+| `ResourceDrawer` | `state: DrawerState`, `loading`, `submitting` | `onClose`, `onSubmit`, `footer(context)`, `title(state, labels)` |
+| `ResourcePage` | — (owns a controller) | `renderHeader`, `renderBeforeTable`, `rowActions`, `tableProps` (handlers composed, not replaced), `drawerProps` |
