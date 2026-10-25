@@ -1,0 +1,51 @@
+{
+  "name": "@library/resource-kit",
+  "version": "0.1.0",
+  "description": "Typed resource configuration, tables, forms and drawers for Refine + Ant Design applications.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@refinedev/core": "^5.0.0",
+    "antd": "^6.0.0",
+    "dayjs": "^1.11.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@refinedev/core": "^5.0.12",
+    "@tanstack/react-query": "^5.81.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "antd": "^6.6.7",
+    "dayjs": "^1.11.13",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.5.1",
+    "vitest": "^3.2.4"
+  }
+}

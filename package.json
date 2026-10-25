@@ -1,0 +1,24 @@
+{
+  "name": "library-management",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @library/resource-kit && npm run build -w library-app",
+    "typecheck": "npm run typecheck -w @library/resource-kit && npm run typecheck -w library-app",
+    "test": "npm run test -w @library/resource-kit",
+    "check:cycles": "madge --circular --extensions ts,tsx packages/resource-kit/src apps/library-app/src",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "verify": "npm run build -w @library/resource-kit && npm run typecheck && npm test && npm run check:cycles && npm run check:boundaries && npm run build -w library-app"
+  },
+  "devDependencies": {
+    "madge": "^8.0.0",
+    "typescript": "~5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
