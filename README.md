@@ -66,18 +66,7 @@ npm run storybook         # dev server on http://localhost:6006 (not started by 
 npm run build-storybook   # static build in packages/resource-kit/storybook-static
 ```
 
-Storybook needs no build step, fake API or network:
-
-- **Imports:** stories import the package by its public name, which Storybook maps to the public entry point.
-- **Presentation stories** run without Refine.
-- **Refine stories** use an in-memory data provider, recreated for every story.
-
-Contents:
-
-- **Guide:** overview, required providers, controlled props, configuration, relations, adding a resource, composing a screen.
-- **Components:** `DataTable` (basic, loading, empty, controlled pagination, row selection, column customization, controlled filters with reset), `ResourceForm` (all field types, initial values, validation, disabled, loading, custom field, API↔form date conversion) and `ResourceDrawer` (create, prefilled edit, record loading, submission in progress, failed submission).
-- **Columns:** every column factory, with false, zero, missing values, three currencies and each relation state.
-- **Composition:** `ResourcePage` for Authors and Books (interactive CRUD, slow API, failing saves) and a custom screen built without `ResourcePage`.
+Storybook documents the package's public API and runs without the fake API or any build step; Refine-based stories use an in-memory data provider. It contains short guides (configuration, relations, adding a resource), the main components and their states, every column factory, and Authors/Books screens plus a custom layout built without `ResourcePage`.
 
 ## 6. Validation commands
 
@@ -196,7 +185,7 @@ A third resource (for example Members) needs only:
 
 1. **A domain model:** `member.types.ts`.
 2. **A resource configuration:** `member.config.tsx` using the factories, plus a one-line `MembersPage`.
-3. **API support:** a `members` collection in `fake-api/seed.json`.
+3. **API support:** a `members` collection in `fake-api/seed.json`, then `npm run seed:reset` to copy it into the runtime database (`db.json`). Note that the reset overwrites any local changes made through the app.
 4. **Registration:** `{ name: "members" }` in `<Refine resources>` and a route in `App.tsx`.
 
 No shared CRUD component changes. Storybook's **Guide → Recipes** page shows a complete, type-checked Member example, including a relation to Books (`packages/resource-kit/stories/examples/member.resource.tsx`). It also shows how to compose `DataTable`, `ResourceDrawer` and `useResourceController` into a custom screen without `ResourcePage`, which **Composition → Custom screen** runs live.
@@ -207,28 +196,27 @@ No shared CRUD component changes. Storybook's **Guide → Recipes** page shows a
 npm run check:consumer
 ```
 
-1. Builds `@library/resource-kit`: ESM + CJS + `.d.ts`/`.d.cts`.
-2. Runs `npm pack`, and asserts the tarball contains only `dist/*` and `package.json` (no sources, stories, fixtures, Storybook config or env files).
-3. Creates a temporary project in the OS temp directory, **outside the workspace**, and installs the tarball plus compatible peers (`react`, `react-dom`, `antd`, `@refinedev/core`, `@tanstack/react-query`, `dayjs`).
-4. Asserts the kit resolves inside that project, has no nested copies of host frameworks, and contains no application code.
-5. Type-checks a consumer that uses components, factories, hooks and types through the public API, including a full check of the kit's own declarations.
-6. Bundles the consumer with Vite, then deletes the temporary project (`KEEP=1` keeps it).
+This builds the package, packs it with `npm pack`, installs the tarball into a temporary project outside the workspace, and type-checks and builds a consumer that uses only the public API. It shows the package can be used by another repository without copying source code. React, antd, Refine and dayjs are peer dependencies, so the package bundles none of them.
 
-The package declares `react`, `react-dom`, `antd` (^6), `@refinedev/core` (^5) and `dayjs` as **peer dependencies** and bundles none of them. Its `exports` map exposes only the entry point, so deep imports fail. `"sideEffects": false`, and importing the package has no side effects.
+## 11. Scaling the approach across repositories
 
-## 11. Reuse across independent repositories
+These are proposals for a real organization, not part of this submission. Here the app and `@library/resource-kit` live in one repository, so reviewers can run everything without registry access. Nothing is published.
 
-For an environment with 100+ repositories, this package could be published to a private npm registry, such as GitHub Packages, using semantic versioning. Each application would consume a versioned release and upgrade independently. The package could remain in this monorepo or move to a dedicated repository according to team ownership, while retaining the same public imports.
+**Private packages and versioning.** I would publish `resource-kit` as a private package on GitHub Packages, versioned with semver. Each project then installs the version it needs and upgrades on its own schedule, instead of copying components between repositories. Upgrades would come with release notes, migration notes for breaking changes, and automated upgrade PRs (for example Renovate), so teams adopt new versions deliberately.
 
-For this assignment, application and package remain together so reviewers can install and run the solution without registry access. Publishing is a future distribution step, not a prerequisite for demonstrating reuse.
+**Shared hooks and utilities.** If several projects end up sharing the same hooks or helpers, those could move into their own small private packages. I would only do this after the reuse is real, not in anticipation of it.
 
-Production adoption would also need:
+**Simple shared components.** Shared components should handle presentation and generic behavior only. Project-specific rules stay in the consuming application and reach the components through props, callbacks or configuration, as the resource configs do here. I would avoid adding options and branches for use cases nobody has asked for yet.
 
-- a tested compatibility matrix for the peer dependencies (React, antd, Refine)
-- release notes and migration guides for breaking changes
-- controlled upgrade PRs (for example Renovate) so each repository adopts new versions deliberately
+**Independence from applications.** The shared package must never depend on an application's modules, services or business rules. Keeping its public API small, generic and predictable is what lets unrelated projects adopt it independently. The boundary check in this repository (`npm run check:boundaries`) is a small version of that rule.
 
-## 12. Known limitations and possible improvements
+**A standard project template.** For many repositories, I would propose a GitHub template repository with the agreed React/TypeScript structure, shared lint/test/build configuration, and the approved internal packages already listed as dependencies. New projects start from "Use this template" and install dependencies through the package manager as usual. That removes repeated setup and keeps projects consistent.
+
+**A shared design system.** Reusable components only stay reusable if projects agree on design. I would work with designers on shared design tokens and a small set of component variants, such as a fixed set of button styles. The alternative is per-project CSS overrides, custom class names and `!important` rules, which gradually break the shared components.
+
+**Not abstracting too early.** I would extract a shared package or component only when reuse clearly pays off. When projects' requirements differ substantially, keeping code local is often simpler and easier to maintain than forcing it into one generic abstraction.
+
+## 12. What I would improve with more time
 
 - **Text filters query on every keystroke:** Refine's `useTable` has no debounce. A debounced text filter control would reduce requests.
 - **No sorting by author name:** the relation column is not sortable, because the API can only sort books by `authorId`.
