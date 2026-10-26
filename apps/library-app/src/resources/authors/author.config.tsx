@@ -22,7 +22,7 @@ export const authorConfig = defineResource<Author, AuthorFormValues, AuthorVaria
     ],
     filters: [
       filters.text("name", { placeholder: "Search by name" }),
-      filters.text("nationality", { operator: "eq" }),
+      filters.text("nationality"),
       filters.boolean("active", { trueLabel: "Active", falseLabel: "Retired" }),
     ],
   },

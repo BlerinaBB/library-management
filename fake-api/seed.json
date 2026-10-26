@@ -191,6 +191,30 @@
       "birthDate": "1988-10-14",
       "bio": "Poet and novelist.",
       "active": true
+    },
+    {
+      "id": "283568d1-ddb3-48df-9db8-0d5b7469a810",
+      "name": "Chimamanda Ngozi Adichie",
+      "nationality": "Nigerian",
+      "birthDate": "1977-09-15",
+      "bio": "Novelist and essayist.",
+      "active": true
+    },
+    {
+      "id": "f3da83b9-77a8-4091-875c-8cd2f11125ba",
+      "name": "Elena Ferrante",
+      "nationality": "Italian",
+      "birthDate": null,
+      "bio": "Pseudonymous novelist of the Neapolitan Novels.",
+      "active": true
+    },
+    {
+      "id": "9268525d-10e7-4b7b-a18b-1a4185b5ff47",
+      "name": "Fatos Kongoli",
+      "nationality": "Albanian",
+      "birthDate": "1944-01-12",
+      "bio": null,
+      "active": false
     }
   ],
   "books": [

@@ -49,7 +49,7 @@ All variables are optional; copy `.env.example` to `.env` to change them. The ap
 
 ## 4. Seed data and reset
 
-- `fake-api/seed.json` is the canonical seed: 24 authors and 40 books with UUIDs. It covers every field, has several books per author, `true`/`false` values, a zero price, and missing dates and page counts, with enough rows for pagination.
+- `fake-api/seed.json` is the canonical seed: 27 authors and 40 books with UUIDs. It covers every field, has several books per author plus three authors without books (so author deletion can be tried right away), `true`/`false` values, a zero price, and missing dates and page counts, with enough rows for pagination.
 - `fake-api/db.json` is the writable runtime copy. It is created from the seed on first start and is git-ignored.
 - **`npm run seed:reset`** restores `db.json` from the seed. A running API picks up the change without a restart.
 
