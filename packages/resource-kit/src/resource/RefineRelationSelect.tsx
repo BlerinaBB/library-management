@@ -22,6 +22,11 @@ export function RefineRelationSelect({ relation, value, onChange, multiple, plac
     debounce: 300,
   });
 
+  // Ant Design clears its search text after a selection and when the dropdown closes without
+  // calling `onSearch`, so `useSelect` would keep serving the last search's results. Reset it
+  // at the same moments so reopening the select shows the default options again.
+  const resetSearch = () => onSearch("");
+
   return (
     <Select
       allowClear
@@ -34,6 +39,14 @@ export function RefineRelationSelect({ relation, value, onChange, multiple, plac
       options={options}
       value={value ?? undefined}
       onChange={(next?: RecordId | RecordId[]) => onChange?.(next ?? undefined)}
+      onSelect={(...args) => {
+        resetSearch();
+        selectProps?.onSelect?.(...args);
+      }}
+      onOpenChange={(open) => {
+        if (!open) resetSearch();
+        selectProps?.onOpenChange?.(open);
+      }}
     />
   );
 }

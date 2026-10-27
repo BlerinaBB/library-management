@@ -75,3 +75,56 @@ export const FailingSaves: Story = {
     },
   },
 };
+
+const rowCount = (canvasElement: HTMLElement) => canvasElement.querySelectorAll("tr.ant-table-row").length;
+
+/** Regression: deleting the only row of the last page moves to the new last page instead of an empty one. */
+export const DeleteLastRowOfLastPage: Story = {
+  tags: ["!autodocs"],
+  render: () => <ResourcePage config={bookConfig} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    // 16 books at 5 per page: page 4 holds exactly one book.
+    await canvas.findByText("Things Fall Apart");
+    await userEvent.click(canvas.getByTitle("4"));
+    await canvas.findByText("On Earth We're Briefly Gorgeous");
+    await waitFor(() => expect(rowCount(canvasElement)).toBe(1));
+
+    await userEvent.click(canvas.getByRole("button", { name: "Delete" }));
+    await userEvent.click(within(await body.findByRole("dialog")).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => expect(canvas.queryByText("On Earth We're Briefly Gorgeous")).not.toBeInTheDocument());
+    await waitFor(() => expect(rowCount(canvasElement)).toBe(5));
+    await expect(canvasElement.querySelector(".ant-pagination-item-active")).toHaveTextContent("3");
+  },
+};
+
+/** Regression: clearing a relation filter also clears its server-side search, so reopening shows the default options. */
+export const RelationFilterSearchResets: Story = {
+  tags: ["!autodocs"],
+  render: () => <ResourcePage config={bookConfig} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await canvas.findByText("Things Fall Apart");
+    // The first combobox in the filter bar is the Author filter.
+    const authorFilter = canvas.getAllByRole("combobox")[0]!;
+
+    // Ocean Vuong is not on the first page of options; find him through the server-side search.
+    await userEvent.click(authorFilter);
+    await body.findByTitle("Chinua Achebe");
+    await userEvent.type(authorFilter, "Vuong");
+    await waitFor(() => expect(body.queryByTitle("Chinua Achebe")).not.toBeInTheDocument());
+    await userEvent.click(await body.findByTitle("Ocean Vuong"));
+    await waitFor(() => expect(rowCount(canvasElement)).toBe(2));
+
+    // Clear the filter, then reopen it: the default options are back, not the last search.
+    await userEvent.keyboard("{Escape}");
+    const clear = authorFilter.closest(".ant-select")!.querySelector(".ant-select-clear")!;
+    await userEvent.click(clear);
+    await waitFor(() => expect(rowCount(canvasElement)).toBe(5));
+    await userEvent.click(authorFilter);
+    await expect(await body.findByTitle("Chinua Achebe", {}, { timeout: 3000 })).toBeInTheDocument();
+  },
+};

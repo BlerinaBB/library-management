@@ -2,7 +2,7 @@ import { useCreate, useDelete, useOne, useTable, useUpdate } from "@refinedev/co
 import type { BaseKey, BaseRecord, CrudSort, HttpError, IQueryKeys, MetaQuery } from "@refinedev/core";
 import { Form } from "antd";
 import type { FormInstance, TableProps } from "antd";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { tableRelations } from "../config/defineResource";
 import { drawerStateKey, useDrawerState } from "../drawer/useDrawerState";
 import type { DrawerStateApi } from "../drawer/useDrawerState";
@@ -106,6 +106,16 @@ export function useResourceController<TRecord, TForm = TRecord, TVariables = Par
   });
   const { setFilters, setSorters, setCurrentPage, setPageSize } = table;
   const records = table.result.data as unknown as TRecord[];
+
+  // Refine keeps `currentPage` when the total shrinks, e.g. after deleting the only row of the
+  // last page, which leaves an empty page (and a stale URL) that the pagination control hides.
+  // Once the list has settled, move to the last page that exists. It converges in one step.
+  const total = table.result.total;
+  const lastPage = total === undefined ? undefined : Math.max(1, Math.ceil(total / table.pageSize));
+  const listSettled = !table.tableQuery.isFetching;
+  useEffect(() => {
+    if (listSettled && lastPage !== undefined && table.currentPage > lastPage) setCurrentPage(lastPage);
+  }, [listSettled, lastPage, table.currentPage, setCurrentPage]);
 
   const filterValues = useMemo(() => fromRefineFilters(filterDefs, table.filters), [filterDefs, table.filters]);
   const onFilterValuesChange = useCallback(
